@@ -21,7 +21,9 @@
  */
 
 using BH.oM.Adapters.Excel;
+using BH.oM.Base;
 using BH.oM.Base.Attributes;
+using System;
 using System.ComponentModel;
 
 namespace BH.Engine.Excel
@@ -32,11 +34,12 @@ namespace BH.Engine.Excel
         /**** Public Methods                    ****/
         /*******************************************/
 
-        [Description("Creates a CellValuesRequest based on the worksheet name and range in an Excel-readable string format.")]
+        [Description("Creates an ObjectRequest based on the worksheet name and range in an Excel-readable string format. The result will be of the type provided as input.")]
         [InputFromProperty("worksheet")]
-        [Input("range", "Cell range in an Excel-readable string format.")]
+        [Input("range", "Cell range in an Excel-readable string format. If not provided, collect teh whole sheet.")]
+        [Input("objectType", "Type of object to create from the table. If not proided, the objects will be CustomObjects.")]
         [Output("request", "CellValuesRequest created based on the input strings.")]
-        public static CellValuesRequest CellValuesRequest(string worksheet = "", string range = "")
+        public static ObjectRequest ObjectRequest(string worksheet = "", string range = "", Type objectType = null)
         {
             CellRange cellRange = null;
             if (!string.IsNullOrWhiteSpace(range))
@@ -46,7 +49,10 @@ namespace BH.Engine.Excel
                     return null;
             }
 
-            return new CellValuesRequest { Worksheet = worksheet, Range = cellRange };
+            if (objectType == null)
+                objectType = typeof(CustomObject);
+
+            return new ObjectRequest { Worksheet = worksheet, Range = cellRange, ObjectType = objectType };
         }
 
         /*******************************************/

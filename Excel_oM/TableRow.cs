@@ -20,40 +20,19 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.Adapter;
-using BH.Engine.Adapter;
-using BH.oM.Adapter;
-using BH.oM.Adapters.Excel;
 using BH.oM.Base;
-using BH.oM.Data.Requests;
+using BH.oM.Base.Attributes;
 using System.Collections.Generic;
-using System.IO;
 
-namespace BH.Adapter.Excel
+
+namespace BH.oM.Adapters.Excel
 {
-    public partial class ExcelAdapter : BHoMAdapter
+    public class TableRow : BHoMObject
     {
         /***************************************************/
-        /**** Method Overrides                          ****/
+        /**** Constructor                               ****/
         /***************************************************/
 
-        public override IEnumerable<object> Pull(IRequest request = null, PullType pullOption = PullType.AdapterDefault, ActionConfig actionConfig = null)
-        {
-            if (request == null || request is FilterRequest)
-                request = new CellValuesRequest();
-
-            if (!File.Exists(m_FileSettings.GetFullFileName()))
-            {
-                BH.Engine.Base.Compute.RecordError("No file exists under the location specified in the settings.");
-                return new List<IBHoMObject>();
-            }
-
-            return Read(request);
-        }
-
-        /***************************************************/
+        public virtual List<object> Content { get; set; } = new List<object>();
     }
 }
-
-
-

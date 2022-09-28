@@ -21,6 +21,7 @@
  */
 
 using BH.Engine.Adapter;
+using BH.Engine.Base;
 using BH.Engine.Excel;
 using BH.oM.Adapter;
 using BH.oM.Adapters.Excel;
@@ -28,8 +29,10 @@ using BH.oM.Base;
 using BH.oM.Data.Collections;
 using BH.oM.Data.Requests;
 using ClosedXML.Excel;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 
 namespace BH.Adapter.Excel
@@ -45,7 +48,9 @@ namespace BH.Adapter.Excel
             XLWorkbook workbook = null;
             try
             {
-                workbook = new XLWorkbook(m_FileSettings.GetFullFileName());
+                FileStream fileStream = new FileStream(m_FileSettings.GetFullFileName(), FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                workbook = new XLWorkbook(fileStream);
+                fileStream.Close();
             }
             catch
             {
@@ -58,7 +63,12 @@ namespace BH.Adapter.Excel
                 return new List<IBHoMObject>();
             }
 
-            if (request is CellValuesRequest)
+            if (request is ObjectRequest)
+            {
+                List<TableRow> result = ReadExcel(workbook, ((ObjectRequest)request).Worksheet, ((ObjectRequest)request).Range, true).OfType<TableRow>().ToList();
+                return CreateObjects(result, ((ObjectRequest)request).ObjectType);
+            }
+            else if (request is CellValuesRequest)
             {
                 return ReadExcel(workbook, ((CellValuesRequest)request).Worksheet, ((CellValuesRequest)request).Range, true);
             }
@@ -94,42 +104,37 @@ namespace BH.Adapter.Excel
         private List<IBHoMObject> ReadExcel(XLWorkbook workbook, string worksheet, string range, bool valuesOnly)
         {
             List<IBHoMObject> result = new List<IBHoMObject>();
-            foreach (IXLWorksheet ixlWorksheet in Worksheets(workbook, worksheet))
+            IXLWorksheet ixlWorksheet = Worksheets(workbook, worksheet).FirstOrDefault();
+            if (ixlWorksheet == null)
             {
-                IXLRange ixlRange = Range(ixlWorksheet, range);
-                if (ixlRange == null)
-                {
-                    Engine.Base.Compute.RecordError("Range provided is not in the correct format for an Excel spreadsheet.");
-                    return new List<IBHoMObject>();
-                }
-
-                List<DataColumn> columns = new List<DataColumn>();
-                foreach (IXLRangeColumn column in ixlRange.Columns())
-                {
-                    columns.Add(new DataColumn(column.ColumnLetter(), typeof(object)));
-                }
-
-                DataTable table = new DataTable();
-                table.Columns.AddRange(columns.ToArray());
-
-                foreach (IXLRangeRow row in ixlRange.Rows())
-                {
-                    List<object> dataRow = new List<object>();
-                    foreach (IXLRangeColumn column in ixlRange.Columns())
-                    {
-                        if (valuesOnly)
-                            dataRow.Add(ixlWorksheet.Cell(row.RowNumber(), column.ColumnNumber()).GetValue<object>());
-                        else
-                            dataRow.Add((ixlWorksheet.Cell(row.RowNumber(), column.ColumnNumber())).FromExcel());
-                    }
-
-                    table.Rows.Add(dataRow.ToArray());
-                }
-
-                result.Add(new Table { Data = table, Name = ixlWorksheet.Name });
+                Engine.Base.Compute.RecordError("worksheet provided cannot be found.");
+                return new List<IBHoMObject>();
             }
 
-            return result;
+            IXLRange ixlRange = Range(ixlWorksheet, range);
+            if (ixlRange == null)
+            {
+                Engine.Base.Compute.RecordError("Range provided is not in the correct format for an Excel spreadsheet.");
+                return new List<IBHoMObject>();
+            }
+
+            List<List<object>> table = new List<List<object>>();
+
+            foreach (IXLRangeRow row in ixlRange.Rows())
+            {
+                List<object> dataRow = new List<object>();
+                foreach (IXLRangeColumn column in ixlRange.Columns())
+                {
+                    if (valuesOnly)
+                        dataRow.Add(ixlWorksheet.Cell(row.RowNumber(), column.ColumnNumber()).GetValue<object>());
+                    else
+                        dataRow.Add((ixlWorksheet.Cell(row.RowNumber(), column.ColumnNumber())).FromExcel());
+                }
+
+                table.Add(dataRow);
+            }
+
+            return table.Select(x => new TableRow { Content = x }).ToList<IBHoMObject>();
         }
 
         /***************************************************/
@@ -170,6 +175,51 @@ namespace BH.Adapter.Excel
             else
                 return worksheet.Range(worksheet.FirstCellUsed().Address, worksheet.LastCellUsed().Address);
         }
+
+        /***************************************************/
+
+        private List<IBHoMObject> CreateObjects(List<TableRow> rows, Type type)
+        {
+            if (rows.Count < 2)
+                return new List<IBHoMObject>();
+
+            if (type == null || type == typeof(CustomObject))
+                return CreateCustomObjects(rows);
+            else if (!typeof(IBHoMObject).IsAssignableFrom(type))
+            {
+                Engine.Base.Compute.RecordError($"The type {type} is not an IBHoMObject");
+                return new List<IBHoMObject>();
+            }
+
+            List<string> properties = rows.First().Content.Select(x => x.ToString()).ToList();
+
+            return rows.Skip(1).Select(row =>
+            {
+                object instance = Activator.CreateInstance(type);
+                for (int i = 0; i < Math.Min((int)properties.Count(), (int)row.Content?.Count()); i++)
+                    instance.SetPropertyValue(properties[i], row.Content[i]);
+                return instance;
+            }).OfType<IBHoMObject>().ToList();
+        }
+
+        /***************************************************/
+
+        private List<IBHoMObject> CreateCustomObjects(List<TableRow> rows)
+        {
+            if (rows.Count < 2)
+                return new List<IBHoMObject>();
+
+            List<string> properties = rows.First().Content.Select(x => x.ToString()).ToList();
+
+            return rows.Skip(1).Select(row =>
+            {
+                Dictionary<string, object> item = new Dictionary<string, object>();
+                for (int i = 0; i < Math.Min((int)properties.Count(), (int)row.Content?.Count()); i ++)
+                    item[properties[i]] = row.Content[i];
+                return new CustomObject { CustomData = item };
+            }).ToList<IBHoMObject>();
+        }
+
 
         /***************************************************/
     }

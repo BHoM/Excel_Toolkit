@@ -61,10 +61,12 @@
     <Compile Include="Address\CellRange.cs" />
     <Compile Include="ClosedXML\CellContents.cs" />
     <Compile Include="Config\ExcelPushConfig.cs" />
+    <Compile Include="Requests\ObjectRequest.cs" />
     <Compile Include="Requests\CellContentsRequest.cs" />
     <Compile Include="Requests\CellValuesRequest.cs" />
     <Compile Include="ClosedXML\WorkbookProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TableRow.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
