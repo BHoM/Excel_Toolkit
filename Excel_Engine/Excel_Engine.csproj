@@ -67,6 +67,7 @@
     <Compile Include="Create\CellAddress.cs" />
     <Compile Include="Create\CellContentsRequest.cs" />
     <Compile Include="Create\CellRange.cs" />
+    <Compile Include="Create\ObjectRequest.cs" />
     <Compile Include="Create\CellValuesRequest.cs" />
     <Compile Include="Create\ExcelPushConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -20,40 +20,32 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using BH.Adapter;
-using BH.Engine.Adapter;
-using BH.oM.Adapter;
-using BH.oM.Adapters.Excel;
 using BH.oM.Base;
 using BH.oM.Data.Requests;
+using System;
 using System.Collections.Generic;
-using System.IO;
+using System.ComponentModel;
 
-namespace BH.Adapter.Excel
+namespace BH.oM.Adapters.Excel
 {
-    public partial class ExcelAdapter : BHoMAdapter
+    [Description("IRequest that pulls cells and their metadata from the excel file.")]
+    public class ObjectRequest : IRequest
     {
         /***************************************************/
-        /**** Method Overrides                          ****/
+        /****                Properties                 ****/
         /***************************************************/
 
-        public override IEnumerable<object> Pull(IRequest request = null, PullType pullOption = PullType.AdapterDefault, ActionConfig actionConfig = null)
-        {
-            if (request == null || request is FilterRequest)
-                request = new CellValuesRequest();
+        [Description("Name of the worksheet to read from.")]
+        public virtual string Worksheet { get; set; } = "";
 
-            if (!File.Exists(m_FileSettings.GetFullFileName()))
-            {
-                BH.Engine.Base.Compute.RecordError("No file exists under the location specified in the settings.");
-                return new List<IBHoMObject>();
-            }
+        [Description("Cell range to read. If left empty, entire extent of the spreadsheet starting from A1 is used.")]
+        public virtual CellRange Range { get; set; } = null;
 
-            return Read(request);
-        }
+        [Description("Type of object to read. If left empty, CustomObjects will be returned.")]
+        public virtual Type ObjectType { get; set; } = typeof(CustomObject);
 
         /***************************************************/
     }
 }
-
 
 
