@@ -22,6 +22,7 @@
 
 using BH.oM.Adapters.Excel;
 using BH.oM.Base.Attributes;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace BH.Engine.Excel
@@ -36,7 +37,7 @@ namespace BH.Engine.Excel
         [Input("startingCell", "Starting cell address in an Excel-readable string format.")]
         [InputFromProperty("workbookProperties")]
         [Output("config", "ExcelPushConfig created based on the inputs.")]
-        public static ExcelPushConfig ExcelPushConfig(string startingCell = "", WorkbookProperties workbookProperties = null)
+        public static ExcelPushConfig ExcelPushConfig(string sheetName = "", string startingCell = "", List<string> objectProperties = null, WorkbookProperties workbookProperties = null)
         {
             CellAddress topLeft = null;
             if (!string.IsNullOrWhiteSpace(startingCell))
@@ -46,7 +47,10 @@ namespace BH.Engine.Excel
                     return null;
             }
 
-            return new ExcelPushConfig { StartingCell = topLeft, WorkbookProperties = workbookProperties };
+            if (objectProperties == null)
+                objectProperties = new List<string>();
+
+            return new ExcelPushConfig { Worksheet = sheetName, StartingCell = topLeft, ObjectProperties = objectProperties, WorkbookProperties = workbookProperties };
         }
 
         /*******************************************/

@@ -21,6 +21,7 @@
  */
 
 using BH.oM.Adapter;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace BH.oM.Adapters.Excel
@@ -32,8 +33,14 @@ namespace BH.oM.Adapters.Excel
         /****             Public Properties             ****/
         /***************************************************/
 
+        [Description("Name of the worksheet to write to.")]
+        public virtual string Worksheet { get; set; } = "";
+
         [Description("The first cell that will be filled with the pushed objects, i.e. top-left cell of the populated space in the spreadsheet.")]
         public virtual CellAddress StartingCell { get; set; } = new CellAddress();
+
+        [Description("List of object properties to push to the table. Those will form the columns of the created table.")]
+        public virtual List<string> ObjectProperties { get; set; } = new List<string>();
 
         [Description("Properties to apply to workbook and contents. If not null, the meta information of the workbook will be updated on push.")]
         public virtual WorkbookProperties WorkbookProperties { get; set; } = null;
