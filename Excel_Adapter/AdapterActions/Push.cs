@@ -21,6 +21,7 @@
  */
 
 using BH.Engine.Adapter;
+using BH.Engine.Reflection;
 using BH.oM.Adapter;
 using BH.oM.Adapters.Excel;
 using BH.oM.Base;
@@ -46,6 +47,7 @@ namespace BH.Adapter.Excel
                 BH.Engine.Base.Compute.RecordError("No objects were provided for Push action.");
                 return new List<object>();
             }
+            objects = objects.Where(x => x != null).ToList();
 
             // If unset, set the pushType to AdapterSettings' value (base AdapterSettings default is FullCRUD).
             if (pushType == PushType.AdapterDefault)
@@ -59,7 +61,7 @@ namespace BH.Adapter.Excel
                 config = new ExcelPushConfig();
             }
 
-            // Make sure that only objects to be pushed are Tables.
+            // Make sure that a single type of objects are pushed
             List<Type> objectTypes = objects.Select(x => x.GetType()).Distinct().ToList();
             if (objectTypes.Count != 1)
             {
@@ -71,25 +73,9 @@ namespace BH.Adapter.Excel
             }
 
             Type type = objectTypes[0];
-            if (type != typeof(Table))
+            if (!typeof(IBHoMObject).IsAssignableFrom(type))
             {
-                BH.Engine.Base.Compute.RecordError($"Push failed: Excel Adapter can push only one objects of type {nameof(Table)}.");
-                return new List<object>();
-            }
-
-            // Check if all tables have distinct, non-empty names.
-            List<Table> tables = objects.Cast<Table>().ToList();
-            if (tables.Any(x => string.IsNullOrWhiteSpace(x.Name)))
-            {
-                BH.Engine.Base.Compute.RecordError("Push aborted: all tables need to have non-empty name.");
-                return new List<object>();
-            }
-
-            List<string> duplicateNames = tables.GroupBy(x => x.Name.ToLower()).Where(x => x.Count() != 1).Select(x => x.Key).ToList();
-            if (duplicateNames.Count != 0)
-            {
-                BH.Engine.Base.Compute.RecordError("Push failed: all tables need to have distinct names, regardless of letter casing.\n" +
-                                                        $"Following names are currently duplicate: {string.Join(", ", duplicateNames)}.");
+                BH.Engine.Base.Compute.RecordError($"Push failed: Excel Adapter can push only one objects of type IBHoMObject.");
                 return new List<object>();
             }
 
@@ -120,55 +106,48 @@ namespace BH.Adapter.Excel
             }
 
             // Split the tables into collections to delete, create and update.
-            List<Table> toDelete = new List<Table>();
-            List<Table> toCreate = new List<Table>();
-            List<Table> toUpdate = new List<Table>();
+            bool success = true;
+            string sheetName = config.Worksheet;
+
+            List<TableRow> data = new List<TableRow>();
+            if (objects.All(x => x is TableRow))
+                data = objects.OfType<TableRow>().ToList();
+            else
+                data = ToTableRows(objects.OfType<IBHoMObject>().ToList(), config.ObjectProperties);
+
             switch (pushType)
             {
                 case PushType.CreateNonExisting:
                     {
-                        toCreate.AddRange(tables.Where(x => workbook.Worksheets.All(y => x.Name != y.Name)));
+                        if (workbook.Worksheets.All(x => x.Name != sheetName))
+                            success &= Create(workbook, sheetName, data, config);
                         break;
                     }
                 case PushType.DeleteThenCreate:
                     {
-                        toDelete.AddRange(tables.Where(x => workbook.Worksheets.Any(y => x.Name == y.Name)));
-                        toCreate.AddRange(tables);
+                        if (workbook.Worksheets.Any(x => x.Name == sheetName))
+                            success &= Delete(workbook, sheetName);
+                        success &= Create(workbook, sheetName, data, config);
                         break;
                     }
                 case PushType.UpdateOnly:
                     {
-                        toUpdate.AddRange(tables.Where(x => workbook.Worksheets.Any(y => x.Name == y.Name)));
+                        success &= Update(workbook, sheetName, data, config);
                         break;
                     }
                 case PushType.UpdateOrCreateOnly:
                     {
-                        toCreate.AddRange(tables.Where(x => workbook.Worksheets.All(y => x.Name != y.Name)));
-                        toUpdate.AddRange(tables.Except(toCreate).ToList());
+                        if (workbook.Worksheets.All(x => x.Name != sheetName))
+                            success &= Create(workbook, sheetName, data, config);
+                        else
+                            success &= Update(workbook, sheetName, data, config);
                         break;
                     }
                 default:
                     {
-                        BH.Engine.Base.Compute.RecordError($"Currently Excel adapter supports only {nameof(PushType)} equal to {pushType}");
+                        BH.Engine.Base.Compute.RecordError($"Currently Excel adapter does not supports {nameof(PushType)} equal to {pushType}");
                         return new List<object>();
                     }
-            }
-
-            // Execute deletion, creation and update in a sequence.
-            bool success = true;
-            foreach (Table table in toDelete)
-            {
-                success &= Delete(workbook, table);
-            }
-
-            foreach (Table table in toCreate)
-            {
-                success &= Create(workbook, table, config);
-            }
-
-            foreach (Table table in toUpdate)
-            {
-                success &= Update(workbook, table, config);
             }
 
             // Try to update the workbook properties and then save it.
@@ -183,6 +162,25 @@ namespace BH.Adapter.Excel
                 BH.Engine.Base.Compute.RecordError($"Finalisation and saving of the workbook failed with the following error: {e.Message}");
                 return new List<object>();
             }
+        }
+
+        /***************************************************/
+        /**** Private Methods                           ****/
+        /***************************************************/
+
+        private List<TableRow> ToTableRows(List<IBHoMObject> objects, List<string> properties)
+        {
+            List<Dictionary<string, object>> content = objects.Where(x => x != null).Select(x => x.PropertyDictionary()).ToList();
+
+            if (properties == null || properties.Count == 0)
+                properties = content.SelectMany(x => x.Keys).Distinct().ToList();
+
+            List<TableRow> values = content
+                .Select(dic => properties.Select(p => dic.ContainsKey(p) ? dic[p].ToString() : ""))
+                .Select(x => new TableRow { Content = x.ToList<object>() })
+                .ToList();
+
+            return new List<TableRow> { new TableRow { Content = properties.ToList<object>() } }.Concat(values).ToList();
         }
 
         /***************************************************/

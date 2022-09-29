@@ -32,16 +32,16 @@ namespace BH.Adapter.Excel
         /**** Public Methods                            ****/
         /***************************************************/
 
-        private bool Delete(IXLWorkbook workbook, Table table)
+        private bool Delete(IXLWorkbook workbook, string sheetName)
         {
             try
             {
-                workbook.Worksheets.Delete(table.Name);
+                workbook.Worksheets.Delete(sheetName);
                 return true;
             }
             catch (Exception e)
             {
-                BH.Engine.Base.Compute.RecordError($"Deletion of worksheet {table.Name} failed with the following error: {e.Message}");
+                BH.Engine.Base.Compute.RecordError($"Deletion of worksheet {sheetName} failed with the following error: {e.Message}");
                 return false;
             }
         }

@@ -22,9 +22,12 @@
 
 using BH.Engine.Excel;
 using BH.oM.Adapters.Excel;
+using BH.oM.Base;
 using BH.oM.Data.Collections;
 using ClosedXML.Excel;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BH.Adapter.Excel
 {
@@ -34,28 +37,28 @@ namespace BH.Adapter.Excel
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public bool Update(IXLWorkbook workbook, Table table, ExcelPushConfig config)
+        public bool Update(IXLWorkbook workbook, string sheetName, List<TableRow> data, ExcelPushConfig config)
         {
-            if (table?.Data == null)
+            if (data == null || data.Count == 0)
             {
-                BH.Engine.Base.Compute.RecordError("Creation of a table failed: input table is null or does not contain a table.");
+                BH.Engine.Base.Compute.RecordError("Creation of a table failed: input table is null or does not contain data.");
                 return false;
             }
 
             try
             {
-                IXLWorksheet worksheet = workbook.Worksheet(table.Name);
+                IXLWorksheet worksheet = workbook.Worksheet(sheetName);
 
                 string startingCell = config?.StartingCell == null ? "A1" : config.StartingCell.ToExcel();
                 if (string.IsNullOrWhiteSpace(startingCell))
                     return false;
 
-                worksheet.Cell(startingCell).InsertData(table.Data);
+                worksheet.Cell(startingCell).InsertData(data.Select(x => x.Content.ToArray()).ToList());
                 return true;
             }
             catch (Exception e)
             {
-                BH.Engine.Base.Compute.RecordError($"Creation of worksheet {table.Name} failed with the following error: {e.Message}");
+                BH.Engine.Base.Compute.RecordError($"Creation of worksheet {sheetName} failed with the following error: {e.Message}");
                 return false;
             }
         }
