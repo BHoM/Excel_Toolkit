@@ -72,13 +72,6 @@ namespace BH.Adapter.Excel
                 return new List<object>();
             }
 
-            Type type = objectTypes[0];
-            if (!typeof(IBHoMObject).IsAssignableFrom(type))
-            {
-                BH.Engine.Base.Compute.RecordError($"Push failed: Excel Adapter can push only one objects of type IBHoMObject.");
-                return new List<object>();
-            }
-
             // Check if the workbook exists and create it if not.
             string fileName = m_FileSettings.GetFullFileName();
             XLWorkbook workbook;
@@ -113,7 +106,7 @@ namespace BH.Adapter.Excel
             if (objects.All(x => x is TableRow))
                 data = objects.OfType<TableRow>().ToList();
             else
-                data = ToTableRows(objects.OfType<IBHoMObject>().ToList(), config.ObjectProperties);
+                data = ToTableRows(objects.ToList(), config.ObjectProperties);
 
             switch (pushType)
             {
@@ -168,12 +161,13 @@ namespace BH.Adapter.Excel
         /**** Private Methods                           ****/
         /***************************************************/
 
-        private List<TableRow> ToTableRows(List<IBHoMObject> objects, List<string> properties)
+        private List<TableRow> ToTableRows(List<object> objects, List<string> properties)
         {
             List<Dictionary<string, object>> content = objects.Where(x => x != null).Select(x => x.PropertyDictionary()).ToList();
 
+            List<string> ignore = new List<string> { "Tags", "CustomData", "Fragments" };
             if (properties == null || properties.Count == 0)
-                properties = content.SelectMany(x => x.Keys).Distinct().ToList();
+                properties = content.SelectMany(x => x.Keys).Distinct().Where(x => !ignore.Contains(x)).ToList();
 
             List<TableRow> values = content
                 .Select(dic => properties.Select(p => dic.ContainsKey(p) ? dic[p].ToString() : ""))
