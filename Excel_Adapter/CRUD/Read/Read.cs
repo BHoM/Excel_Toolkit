@@ -209,14 +209,25 @@ namespace BH.Adapter.Excel
             if (rows.Count < 2)
                 return new List<IBHoMObject>();
 
-            List<string> properties = rows.First().Content.Select(x => x.ToString()).ToList();
+            List<string> customProperties = typeof(CustomObject).GetProperties().Select(x => x.Name).ToList();
+            List<string> keys = rows.First().Content.Select(x => x.ToString()).ToList();
 
             return rows.Skip(1).Select(row =>
             {
+                CustomObject result = new CustomObject();
+
                 Dictionary<string, object> item = new Dictionary<string, object>();
-                for (int i = 0; i < Math.Min((int)properties.Count(), (int)row.Content?.Count()); i ++)
-                    item[properties[i]] = row.Content[i];
-                return new CustomObject { CustomData = item };
+                for (int i = 0; i < Math.Min((int)keys.Count(), (int)row.Content?.Count()); i ++)
+                {
+                    if (customProperties.Contains(keys[i]))
+                        result.SetPropertyValue(keys[i], row.Content[i]);
+                    else
+                        item[keys[i]] = row.Content[i];
+                }
+
+                result.CustomData = item;
+                return result;
+
             }).ToList<IBHoMObject>();
         }
 
