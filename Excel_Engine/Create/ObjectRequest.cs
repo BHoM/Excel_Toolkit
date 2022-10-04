@@ -36,7 +36,7 @@ namespace BH.Engine.Excel
 
         [Description("Creates an ObjectRequest based on the worksheet name and range in an Excel-readable string format. The result will be of the type provided as input.")]
         [InputFromProperty("worksheet")]
-        [Input("range", "Cell range in an Excel-readable string format. If not provided, collect teh whole sheet.")]
+        [Input("range", "Cell range in an Excel-readable string format. If not provided, collect the whole sheet.")]
         [Input("objectType", "Type of object to create from the table. If not proided, the objects will be CustomObjects.")]
         [Output("request", "CellValuesRequest created based on the input strings.")]
         public static ObjectRequest ObjectRequest(string worksheet = "", string range = "", Type objectType = null)
