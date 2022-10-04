@@ -39,8 +39,19 @@ namespace BH.Adapter.Excel
 
         public override IEnumerable<object> Pull(IRequest request = null, PullType pullOption = PullType.AdapterDefault, ActionConfig actionConfig = null)
         {
-            if (request == null || request is FilterRequest)
+            if (request == null)
                 request = new CellValuesRequest();
+            else if (request is FilterRequest)
+            {
+                FilterRequest filterReq = request as FilterRequest;
+                if (filterReq.Type == null)
+                    request = new CellValuesRequest();
+                else
+                {
+                    BH.Engine.Base.Compute.RecordError("FilterRequests are not supported by the ExcelAdapter.");
+                    return new List<object>();
+                }
+            }
 
             if (!File.Exists(m_FileSettings.GetFullFileName()))
             {
