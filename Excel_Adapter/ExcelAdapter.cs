@@ -23,6 +23,7 @@
 using BH.Adapter;
 using BH.oM.Adapters.Excel;
 using BH.oM.Base.Attributes;
+using BH.oM.Data.Requests;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -60,6 +61,21 @@ namespace BH.Adapter.Excel
             // This is needed because of save action of large files being made with an isolated storage 
             // Fox taken from http://rekiwi.blogspot.com/2008/12/unable-to-determine-identity-of-domain.html
             VerifySecurityEvidenceForIsolatedStorage(this.GetType().Assembly);
+        }
+
+        /***************************************************/
+        /**** Override Methods                          ****/
+        /***************************************************/
+
+        public override bool SetupPullRequest(object request, out IRequest actualRequest)
+        {
+            if (request == null)
+            {
+                actualRequest = new CellValuesRequest();
+                return true;
+            }
+            else
+                return base.SetupPullRequest(request, out actualRequest);
         }
 
 
