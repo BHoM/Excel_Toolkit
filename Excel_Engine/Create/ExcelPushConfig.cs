@@ -37,6 +37,7 @@ namespace BH.Engine.Excel
         [Input("startingCell", "Starting cell address in an Excel-readable string format.")]
         [InputFromProperty("workbookProperties")]
         [Output("config", "ExcelPushConfig created based on the inputs.")]
+        [PreviousVersion("6.0", "BH.Engine.Excel.Create.ExcelPushConfig(System.String, BH.oM.Adapters.Excel.WorkbookProperties)")]
         public static ExcelPushConfig ExcelPushConfig(string sheetName = "", string startingCell = "", List<string> objectProperties = null, WorkbookProperties workbookProperties = null)
         {
             CellAddress topLeft = null;
