@@ -55,7 +55,7 @@ namespace BH.Adapter.Excel
                 if (string.IsNullOrWhiteSpace(startingCell))
                     return false;
 
-                worksheet.Cell(startingCell).InsertData(data.Select(x => x.Content.ToArray()).ToList());
+                worksheet.Cell(startingCell).InsertData(data.Select(x => x.Content.Select(y => y.ToString()).ToArray()).ToList());
                 return true;
             }
             catch (Exception e)
