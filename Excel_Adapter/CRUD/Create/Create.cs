@@ -20,6 +20,7 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.Engine.Base;
 using BH.Engine.Excel;
 using BH.oM.Adapters.Excel;
 using BH.oM.Base;
@@ -55,7 +56,7 @@ namespace BH.Adapter.Excel
                 if (string.IsNullOrWhiteSpace(startingCell))
                     return false;
 
-                worksheet.Cell(startingCell).InsertData(data.Select(x => x.Content.Select(y => y.ToString()).ToArray()).ToList());
+                worksheet.Cell(startingCell).InsertData(data.Select(x => x.Content.Select(y => y.IToText()).ToArray()).ToList());
                 return true;
             }
             catch (Exception e)
