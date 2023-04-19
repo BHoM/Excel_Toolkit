@@ -59,6 +59,9 @@ namespace BH.Adapter.Excel
 
         /*******************************************/
 
+        [Description("Gets the value of the cell, or cached value if the TryGetValue method fails. Raises a warning if the cached value is used, and ClosedXML beleives the cell needs to be recalculated.")]
+        [Input("xLCell", "IXLCell to get the (cached) value from.")]
+        [Input("value", "Value or cached value of the cell.")]
         public static object CellValueOrCashedValue(this IXLCell xLCell) 
         {
             object value;
