@@ -126,7 +126,7 @@ namespace BH.Adapter.Excel
                 foreach (IXLRangeColumn column in ixlRange.Columns())
                 {
                     if (valuesOnly)
-                        dataRow.Add(ixlWorksheet.Cell(row.RowNumber(), column.ColumnNumber()).GetValue<object>());
+                        dataRow.Add(ixlWorksheet.Cell(row.RowNumber(), column.ColumnNumber()).CellValueOrCashedValue());
                     else
                         dataRow.Add((ixlWorksheet.Cell(row.RowNumber(), column.ColumnNumber())).FromExcel());
                 }
