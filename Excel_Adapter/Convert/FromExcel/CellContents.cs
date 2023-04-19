@@ -45,7 +45,7 @@ namespace BH.Adapter.Excel
             return new CellContents()
             {
                 Comment = xLCell.HasComment ? xLCell.Comment.Text : "",
-                Value = xLCell.Value,
+                Value = xLCell.CellValueOrCashedValue(),
                 Address = BH.Engine.Excel.Create.CellAddress(xLCell.Address.ToString()),
                 DataType = xLCell.DataType.SystemType(),
                 FormulaA1 = xLCell.FormulaA1,
@@ -53,8 +53,26 @@ namespace BH.Adapter.Excel
                 HyperLink = xLCell.HasHyperlink ? xLCell.Hyperlink.ExternalAddress.ToString() : "",
                 RichText = xLCell.HasRichText ? xLCell.RichText.Text : ""
             };
+
+
         }
 
+        /*******************************************/
+
+        public static object CellValueOrCashedValue(this IXLCell xLCell) 
+        {
+            object value;
+            if (!xLCell.TryGetValue(out value)) 
+            {
+                //If not able to just get the value, then get the cached value
+                //If cell is flagged as needing recalculation, raise warning.
+                if (xLCell.NeedsRecalculation)
+                    BH.Engine.Base.Compute.RecordWarning($"Cell {xLCell?.Address?.ToString() ?? "unknown"} is flagged as needing to be recalculated, but this is not able to be done. The cached value for this cell is returned, which for most cases is correct, but please ensure the validity of the value.");
+
+                value = xLCell.CachedValue;
+            }
+            return value;
+        }
 
         /*******************************************/
         /**** Private Methods                   ****/
