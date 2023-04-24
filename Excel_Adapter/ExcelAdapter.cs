@@ -86,8 +86,12 @@ namespace BH.Adapter.Excel
         private void VerifySecurityEvidenceForIsolatedStorage(Assembly assembly)
         {
             var isEvidenceFound = true;
-            //var initialAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence;
+#if ZCTDEPLOY
             var initialAppDomainEvidence = new Evidence();
+#else
+            var initialAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence;
+#endif
+
             try
             {
                 // this will fail when the current AppDomain Evidence is instantiated via COM or in PowerShell
