@@ -86,7 +86,8 @@ namespace BH.Adapter.Excel
         private void VerifySecurityEvidenceForIsolatedStorage(Assembly assembly)
         {
             var isEvidenceFound = true;
-            var initialAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence;
+            //var initialAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence;
+            var initialAppDomainEvidence = new Evidence();
             try
             {
                 // this will fail when the current AppDomain Evidence is instantiated via COM or in PowerShell
@@ -108,7 +109,7 @@ namespace BH.Adapter.Excel
                 var securityIdentityField = currentAppDomain.GetType().GetField("_SecurityIdentity", BindingFlags.Instance | BindingFlags.NonPublic);
                 securityIdentityField.SetValue(currentAppDomain, initialAppDomainEvidence);
 
-                var latestAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence; // setting a breakpoint here will let you inspect the current app domain evidence
+                //var latestAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence; // setting a breakpoint here will let you inspect the current app domain evidence
             }
         }
 
