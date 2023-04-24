@@ -83,10 +83,17 @@
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.7.2" />
     <PackageReference Include="ExcelNumberFormat" Version="1.0.10" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.0.1" />
     <PackageReference Include="System.IO.Packaging" Version="4.0.0" />
     <PackageReference Include="System.Security.AccessControl" Version="6.0.2-mauipre.1.22102.15" />
     <PackageReference Include="System.Security.Permissions" Version="8.0.0-preview.2.23128.3" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
+    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='ZeroCodeTool'">
+    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
