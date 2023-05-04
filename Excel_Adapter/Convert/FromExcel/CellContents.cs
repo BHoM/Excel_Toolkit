@@ -45,7 +45,7 @@ namespace BH.Adapter.Excel
             return new CellContents()
             {
                 Comment = xLCell.HasComment ? xLCell.Comment.Text : "",
-                Value = xLCell.CellValueOrCashedValue(),
+                Value = xLCell.CellValueOrCachedValue(),
                 Address = BH.Engine.Excel.Create.CellAddress(xLCell.Address.ToString()),
                 DataType = xLCell.DataType.SystemType(),
                 FormulaA1 = xLCell.FormulaA1,
@@ -62,7 +62,7 @@ namespace BH.Adapter.Excel
         [Description("Gets the value of the cell, or cached value if the TryGetValue method fails. Raises a warning if the cached value is used, and ClosedXML beleives the cell needs to be recalculated.")]
         [Input("xLCell", "IXLCell to get the (cached) value from.")]
         [Input("value", "Value or cached value of the cell.")]
-        public static object CellValueOrCashedValue(this IXLCell xLCell) 
+        public static object CellValueOrCachedValue(this IXLCell xLCell) 
         {
             object value;
             if (!xLCell.TryGetValue(out value)) 
@@ -70,7 +70,7 @@ namespace BH.Adapter.Excel
                 //If not able to just get the value, then get the cached value
                 //If cell is flagged as needing recalculation, raise warning.
                 if (xLCell.NeedsRecalculation)
-                    BH.Engine.Base.Compute.RecordWarning($"Cell {xLCell?.Address?.ToString() ?? "unknown"} is flagged as needing to be recalculated, but this is not able to be done. The cached value for this cell is returned, which for most cases is correct, but please ensure the validity of the value.");
+                    BH.Engine.Base.Compute.RecordWarning($"Cell {xLCell?.Address?.ToString() ?? "unknown"} is flagged as needing to be recalculated, but this is not able to be done. The cached value for this cell is returned, which for most cases is correct, but please check the validity of the value.");
 
                 value = xLCell.CachedValue;
             }
