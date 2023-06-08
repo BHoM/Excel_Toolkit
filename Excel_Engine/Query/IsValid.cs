@@ -96,7 +96,14 @@ namespace BH.Engine.Excel
                 return false;
             }
 
+            if(m_ColumnIndexFormat.IsMatch(address))
+            {
+                //Address is letters only, no numbers - skip number check
+                return true;
+            }
+
             int row = int.Parse(Regex.Match(address, @"\d+").Value);
+
             if (row < 1)
             {
                 BH.Engine.Base.Compute.RecordError($"Address equal to { address} is not valid: row index cannot lower than 1.");
@@ -153,7 +160,7 @@ namespace BH.Engine.Excel
         /*******************************************/
 
         private static readonly Regex m_ColumnIndexFormat = new Regex(@"^[A-Za-z]+$");
-        private static readonly Regex m_AddressFormat = new Regex(@"^[A-Za-z]+\d+$");
+        private static readonly Regex m_AddressFormat = new Regex(@"^([A-Za-z]*\d*)$");
         private static readonly Regex m_RangeFormat = new Regex(@"^([A-Za-z]*\d*):([A-Za-z]*\d*)$");
 
         /*******************************************/
