@@ -23,7 +23,6 @@
 using BH.oM.Adapters.Excel;
 using BH.oM.Base.Attributes;
 using System.ComponentModel;
-using System.Text.RegularExpressions;
 
 namespace BH.Engine.Excel
 {
