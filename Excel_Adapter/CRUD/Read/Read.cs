@@ -29,6 +29,7 @@ using BH.oM.Base;
 using BH.oM.Data.Collections;
 using BH.oM.Data.Requests;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -112,6 +113,18 @@ namespace BH.Adapter.Excel
             string rangeString = "";
             if (range != null)
             {
+                if (string.IsNullOrEmpty(range.From.Column))
+                    range.From.Column = "A";
+
+                if(range.From.Row == -1)
+                    range.From.Row = 1;
+
+                if (string.IsNullOrEmpty(range.To.Column))
+                    range.To.Column = MaximumColumnName(workbook, worksheet);
+
+                if(range.To.Row == -1)
+                    range.To.Row = MaximumRowNumber(workbook, worksheet);
+
                 rangeString = range.ToExcel();
                 if (string.IsNullOrWhiteSpace(rangeString))
                     return new List<IBHoMObject>();
@@ -252,8 +265,45 @@ namespace BH.Adapter.Excel
             }).ToList<IBHoMObject>();
         }
 
+        /***************************************************/
+
+        private string MaximumColumnName(IXLWorkbook workbook, string worksheet)
+        {
+            var sheet = Worksheets(workbook, worksheet).FirstOrDefault();
+            if (sheet == null)
+                return "XFD"; //Maximum Excel Column name
+
+            var columnNumber = sheet.LastColumnUsed().ColumnNumber();
+            return ConvertToColumnName(columnNumber);     
+        }
 
         /***************************************************/
+
+        private int MaximumRowNumber(IXLWorkbook workbook, string worksheet)
+        {
+            var sheet = Worksheets(workbook, worksheet).FirstOrDefault();
+            if (sheet == null)
+                return 1048576; //Maximum Excel Row number
+
+            return sheet.LastRowUsed().RowNumber();
+        }
+
+        /***************************************************/
+
+        private string ConvertToColumnName(int number)
+        {
+            int mod = 0;
+            string columnHeading = "";
+
+            while (number > 0)
+            {
+                mod = (number - 1) % 26;
+                columnHeading = System.Convert.ToChar(65 + mod).ToString() + columnHeading;
+                number = (int)((number - mod) / 26);
+            }
+
+            return columnHeading;
+        }
     }
 }
 

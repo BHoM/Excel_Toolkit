@@ -42,12 +42,19 @@ namespace BH.Engine.Excel
                 return null;
 
             string column = Regex.Match(excelAddress, @"[A-Z]+").Value;
-            int row = int.Parse(Regex.Match(excelAddress, @"\d+").Value);
+
+            int row = -1;
+            if(!m_LetterOnlyFormat.IsMatch(excelAddress))
+                row = int.Parse(Regex.Match(excelAddress, @"\d+").Value);
 
             return new CellAddress { Column = column, Row = row };
         }
 
         /*******************************************/
+        /**** Private fields                    ****/
+        /*******************************************/
+
+        private static readonly Regex m_LetterOnlyFormat = new Regex(@"^[A-Za-z]+$");
     }
 }
 
