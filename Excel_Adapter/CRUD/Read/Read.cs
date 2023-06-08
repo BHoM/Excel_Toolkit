@@ -29,6 +29,7 @@ using BH.oM.Base;
 using BH.oM.Data.Collections;
 using BH.oM.Data.Requests;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -74,6 +75,8 @@ namespace BH.Adapter.Excel
             }
             else if (request is CellContentsRequest)
                 return ReadExcel(workbook, ((CellContentsRequest)request).Worksheet, ((CellContentsRequest)request).Range, false);
+            else if (request is WorksheetsRequest)
+                return ReadExcel(workbook);
             else
             {
                 BH.Engine.Base.Compute.RecordError($"Requests of type {request?.GetType()} are not supported by the Excel adapter.");
@@ -84,6 +87,24 @@ namespace BH.Adapter.Excel
 
         /***************************************************/
         /**** Private Methods                           ****/
+        /***************************************************/
+
+        private List<IBHoMObject> ReadExcel(XLWorkbook workbook)
+        {
+            var worksheets = Worksheets(workbook, null);
+
+            List<BH.oM.Adapters.Excel.Worksheet> sheets = new List<BH.oM.Adapters.Excel.Worksheet>();
+
+            sheets = worksheets.Select(x =>
+            {
+                var sheet = new BH.oM.Adapters.Excel.Worksheet();
+                sheet.Name = x.Name;
+                return sheet;
+            }).ToList();
+
+            return sheets.ToList<IBHoMObject>();
+        }
+
         /***************************************************/
 
         private List<IBHoMObject> ReadExcel(XLWorkbook workbook, string worksheet, CellRange range, bool valuesOnly)
