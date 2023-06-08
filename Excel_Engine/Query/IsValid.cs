@@ -134,7 +134,7 @@ namespace BH.Engine.Excel
 
             if (matchBegins0.IsMatch(from) || matchBegins0.IsMatch(to))
             {
-                BH.Engine.Base.Compute.RecordError("Cell value cannot be or begin with 0.")
+                BH.Engine.Base.Compute.RecordError("Cell value cannot be or begin with 0.");
                 return false;
             }
 
