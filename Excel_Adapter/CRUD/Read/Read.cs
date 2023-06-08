@@ -76,7 +76,7 @@ namespace BH.Adapter.Excel
             else if (request is CellContentsRequest)
                 return ReadExcel(workbook, ((CellContentsRequest)request).Worksheet, ((CellContentsRequest)request).Range, false);
             else if (request is WorksheetsRequest)
-                return ReadExcel(workbook);
+                return ReadExcel(workbook, ((WorksheetsRequest)request));
             else
             {
                 BH.Engine.Base.Compute.RecordError($"Requests of type {request?.GetType()} are not supported by the Excel adapter.");
@@ -89,7 +89,7 @@ namespace BH.Adapter.Excel
         /**** Private Methods                           ****/
         /***************************************************/
 
-        private List<IBHoMObject> ReadExcel(XLWorkbook workbook)
+        private List<IBHoMObject> ReadExcel(XLWorkbook workbook, WorksheetsRequest request)
         {
             var worksheets = Worksheets(workbook, null);
 
@@ -101,6 +101,9 @@ namespace BH.Adapter.Excel
                 sheet.Name = x.Name;
                 return sheet;
             }).ToList();
+
+            if (!string.IsNullOrEmpty(request.NameContains))
+                sheets = sheets.Where(x => x.Name.ToLower().Contains(request.NameContains.ToLower())).ToList();
 
             return sheets.ToList<IBHoMObject>();
         }
