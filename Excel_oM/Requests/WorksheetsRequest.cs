@@ -33,6 +33,9 @@ namespace BH.oM.Adapters.Excel
         /****                Properties                 ****/
         /***************************************************/
 
+        [Description("Optional filter for worksheets where the name contains the string provided. If left blank, then all worksheets will be returned.")]
+        public virtual string NameContains { get; set; } = null;
+
     }
 }
 
