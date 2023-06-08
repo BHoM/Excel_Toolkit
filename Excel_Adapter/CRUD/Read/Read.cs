@@ -29,7 +29,6 @@ using BH.oM.Base;
 using BH.oM.Data.Collections;
 using BH.oM.Data.Requests;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
 using System.Data;
