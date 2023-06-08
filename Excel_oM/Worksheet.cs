@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
  * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
  *
@@ -26,9 +26,9 @@ using System.Collections.Generic;
 
 namespace BH.oM.Adapters.Excel
 {
-    public class TableRow : BHoMObject
+    public class Worksheet : BHoMObject
     {
-        public virtual List<object> Content { get; set; } = new List<object>();
+        //Only want a name which can come from BHoMObject
     }
 }
 
