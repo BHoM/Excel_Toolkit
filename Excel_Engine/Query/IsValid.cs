@@ -123,7 +123,7 @@ namespace BH.Engine.Excel
 
             if (split.Length != 2)
             {
-                BH.Engine.Base.Compute.RecordError("Must provided values in the format of 'expression1:expression2'");
+                BH.Engine.Base.Compute.RecordError("Range values must be in the format of 'expression1:expression2'");
                 return false;
             }
 
