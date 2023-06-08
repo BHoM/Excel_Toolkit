@@ -291,6 +291,7 @@ namespace BH.Adapter.Excel
 
         private string ConvertToColumnName(int number)
         {
+            //Taken from https://frasergreenroyd.com/convert-a-number-to-an-excel-column-heading/
             int mod = 0;
             string columnHeading = "";
 
