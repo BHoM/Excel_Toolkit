@@ -119,17 +119,32 @@ namespace BH.Engine.Excel
                 return false;
             }
 
-            if (!m_RangeFormat.IsMatch(range))
+            string[] split = range.Split(new char[] { ':' });
+
+            if (split.Length != 2)
             {
-                BH.Engine.Base.Compute.RecordError($"Range equal to {range} is not valid: it needs to consist of two sets of capital letters followed by digits, divided with a colon, for example 'A1:Z99'.");
+                BH.Engine.Base.Compute.RecordError("Must provided values in the format of 'expression1:expression2'");
                 return false;
             }
 
-            string[] split = range.Split(new char[] { ':' });
             string from = split[0];
             string to = split[1];
 
-            return from.IsValidAddress() && to.IsValidAddress();
+            Regex matchBegins0 = new Regex("^0$");
+
+            if (matchBegins0.IsMatch(from) || matchBegins0.IsMatch(to))
+            {
+                BH.Engine.Base.Compute.RecordError("Cell value cannot be or begin with 0.")
+                return false;
+            }
+
+            if (!m_RangeFormat.IsMatch(range))
+            {
+                BH.Engine.Base.Compute.RecordError($"Range equal to {range} is not valid: it needs to consist of two similar expressions separated by a colon, for example 'A1:Z99', 'A:B', or '3:9'.");
+                return false;
+            }
+
+            return true;
         }
 
 
@@ -137,9 +152,9 @@ namespace BH.Engine.Excel
         /**** Private fields                    ****/
         /*******************************************/
 
-        private static readonly Regex m_ColumnIndexFormat = new Regex(@"^[A-Z]+$");
-        private static readonly Regex m_AddressFormat = new Regex(@"^[A-Z]+\d+$");
-        private static readonly Regex m_RangeFormat = new Regex(@"^[A-Z]+\d+:[A-Z]+\d+$");
+        private static readonly Regex m_ColumnIndexFormat = new Regex(@"^[A-Za-z]+$");
+        private static readonly Regex m_AddressFormat = new Regex(@"^[A-Za-z]+\d+$");
+        private static readonly Regex m_RangeFormat = new Regex(@"^([A-Za-z]*\d*):([A-Za-z]*\d*)$");
 
         /*******************************************/
     }
