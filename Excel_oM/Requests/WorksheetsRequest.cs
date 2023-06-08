@@ -38,6 +38,3 @@ namespace BH.oM.Adapters.Excel
 
     }
 }
-
-
-

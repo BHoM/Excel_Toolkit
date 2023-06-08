@@ -92,14 +92,12 @@ namespace BH.Adapter.Excel
         {
             var worksheets = Worksheets(workbook, null);
 
-            List<BH.oM.Adapters.Excel.Worksheet> sheets = new List<BH.oM.Adapters.Excel.Worksheet>();
-
-            sheets = worksheets.Select(x =>
-            {
-                var sheet = new BH.oM.Adapters.Excel.Worksheet();
-                sheet.Name = x.Name;
-                return sheet;
-            }).ToList();
+            List<BH.oM.Adapters.Excel.Worksheet> sheets = worksheets.Select(x =>
+                {
+                    var sheet = new BH.oM.Adapters.Excel.Worksheet();
+                    sheet.Name = x.Name;
+                    return sheet;
+                }).ToList();
 
             if (!string.IsNullOrEmpty(request.NameContains))
                 sheets = sheets.Where(x => x.Name.ToLower().Contains(request.NameContains.ToLower())).ToList();
