@@ -37,7 +37,7 @@ namespace BH.Engine.Excel
 
         [Description("Generates the Excel Toolkit wiki URL for a provided page.")]
         [Input("page", "An optional page in the wiki to link to. If no page is provided, the root URL is returned.")]
-        [Output("url", "Fully qualified URL for the Revit Toolkit wiki.")]
+        [Output("url", "Fully qualified URL for the Excel Toolkit wiki.")]
         public static string ExcelToolkitWiki(string page = null)
         {
             string url = "https://github.com/BHoM/Excel_Toolkit/wiki";
