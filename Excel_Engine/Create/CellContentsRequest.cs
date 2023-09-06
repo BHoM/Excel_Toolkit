@@ -36,7 +36,7 @@ namespace BH.Engine.Excel
         [InputFromProperty("worksheet")]
         [Input("range", "Cell range in an Excel-readable string format.")]
         [Output("request", "CellContentsRequest created based on the input strings.")]
-        public static CellContentsRequest CellContentsRequest(string worksheet, string range)
+        public static CellContentsRequest CellContentsRequest(string worksheet, string range = "")
         {
             CellRange cellRange = null;
             if (!string.IsNullOrWhiteSpace(range))
