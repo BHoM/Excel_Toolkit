@@ -23,10 +23,12 @@
 using BH.oM.Data.Requests;
 using System.Collections.Generic;
 using System.ComponentModel;
+using BH.oM.Base.Attributes;
 
 namespace BH.oM.Adapters.Excel
 {
     [Description("IRequest that pulls cells and their metadata from the excel file.")]
+    [NoAutoConstructor]
     public class CellContentsRequest : IRequest
     {
         /***************************************************/
