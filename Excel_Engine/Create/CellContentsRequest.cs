@@ -34,9 +34,9 @@ namespace BH.Engine.Excel
 
         [Description("Creates a CellContentsRequest based on the worksheet name and range in an Excel-readable string format.")]
         [InputFromProperty("worksheet")]
-        [Input("range", "Cell range in an Excel-readable string format.")]
+        [Input("range", "Cell range in an Excel-readable string format. If no range provided the default will be for the whole worksheet starting from A1 and extending to the extents of the used range in the worksheet.")]
         [Output("request", "CellContentsRequest created based on the input strings.")]
-        public static CellContentsRequest CellContentsRequest(string worksheet, string range)
+        public static CellContentsRequest CellContentsRequest(string worksheet, string range = "")
         {
             CellRange cellRange = null;
             if (!string.IsNullOrWhiteSpace(range))
