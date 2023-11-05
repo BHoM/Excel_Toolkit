@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
-    <Exec Command="xcopy &quot;$(TargetPath)&quot;  &quot;$(ProgramData)\BHoM\Assemblies&quot; /C /Y&#xD;&#xA;xcopy &quot;$(TargetDir)ClosedXML.dll&quot;  &quot;$(ProgramData)\BHoM\Assemblies&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetDir)ExcelNumberFormat.dll&quot;  &quot;$(ProgramData)\BHoM\Assemblies&quot; /Y&#xD;&#xA;xcopy &quot;$(TargetDir)DocumentFormat.OpenXml.dll&quot;  &quot;$(ProgramData)\BHoM\Assemblies&quot; /Y" />
+    <Exec Command="xcopy &quot;$(TargetPath)&quot;  &quot;$(ProgramData)\BHoM\Assemblies&quot; /C /Y&#xD;&#xA;xcopy &quot;$(TargetDir)ClosedXML.dll&quot;  &quot;$(ProgramData)\BHoM\Assemblies&quot; /Y" />
   </Target>
 
   <ItemGroup>
@@ -83,20 +83,12 @@
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.95.0" />
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.7.2" />
-    <PackageReference Include="ExcelNumberFormat" Version="1.0.10" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.IO.Packaging" Version="4.0.0" />
-    <PackageReference Include="System.Security.AccessControl" Version="6.0.2-mauipre.1.22102.15" />
-    <PackageReference Include="System.Security.Permissions" Version="8.0.0-preview.2.23128.3" />
+    <PackageReference Include="System.Security.Permissions" Version="8.0.0-rc.2.23479.6" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.0.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)'=='ZeroCodeTool'">
-    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

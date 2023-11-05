@@ -64,6 +64,23 @@ namespace BH.Adapter.Excel
         }
 
         /***************************************************/
+
+        [Description("Adapter to create a new Excel file based on an existing template.")]
+        [Input("templateStream", "Defines the content of the iput Excel file. This content will not be modifed")]
+        [Output("outputStream", "Defines the content of the new Excel file. This will be generated on a push and is not required for a pull.")]
+        public ExcelAdapter(Stream inputStream, Stream outputStream = null)
+        {
+            if (inputStream == null)
+            {
+                BH.Engine.Base.Compute.RecordError("Please set the Stream for the template to enable the Excel Adapter to work correctly.");
+                return;
+            }
+
+            m_InputStream = inputStream;
+            m_OutputStream = outputStream;
+        }
+
+        /***************************************************/
         /**** Override Methods                          ****/
         /***************************************************/
 
@@ -123,6 +140,10 @@ namespace BH.Adapter.Excel
         /***************************************************/
 
         private BH.oM.Adapter.FileSettings m_FileSettings = null;
+
+        private Stream m_InputStream = null;
+
+        private Stream m_OutputStream = null;
 
         /***************************************************/
     }

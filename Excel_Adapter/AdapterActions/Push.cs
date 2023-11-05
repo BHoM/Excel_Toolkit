@@ -43,12 +43,20 @@ namespace BH.Adapter.Excel
 
         public override List<object> Push(IEnumerable<object> objects, string tag = "", PushType pushType = PushType.AdapterDefault, ActionConfig actionConfig = null)
         {
+            // Make sure there are objects to push
             if (objects == null || !objects.Any())
             {
                 BH.Engine.Base.Compute.RecordError("No objects were provided for Push action.");
                 return new List<object>();
             }
             objects = objects.Where(x => x != null).ToList();
+
+            // Make sure an output stream has been provided if the input is read through a stream
+            if (m_InputStream != null && m_OutputStream == null)
+            {
+                BH.Engine.Base.Compute.RecordError("Please set the Stream for the output to enable the push to work correctly.");
+                return new List<object>();
+            }
 
             // If unset, set the pushType to AdapterSettings' value (base AdapterSettings default is FullCRUD).
             if (pushType == PushType.AdapterDefault)
@@ -74,29 +82,15 @@ namespace BH.Adapter.Excel
             }
 
             // Check if the workbook exists and create it if not.
-            string fileName = m_FileSettings.GetFullFileName();
-            XLWorkbook workbook;
-            if (!File.Exists(fileName))
-            {
-                if (pushType == PushType.UpdateOnly)
-                {
-                    BH.Engine.Base.Compute.RecordError($"There is no workbook to update under {fileName}");
-                    return new List<object>();
-                }
-
-                workbook = new XLWorkbook();
-            }
+            XLWorkbook workbook = null;
+            if (m_FileSettings != null)
+                workbook = CreateWorkbookFromFile(m_FileSettings.GetFullFileName(), pushType);
+            else if (m_InputStream != null)
+                workbook = CreateWorkbookFromStream(m_InputStream);
             else
             {
-                try
-                {
-                    workbook = new XLWorkbook(fileName);
-                }
-                catch (Exception e)
-                {
-                    BH.Engine.Base.Compute.RecordError($"The existing workbook could not be accessed due to the following error: {e.Message}");
-                    return new List<object>();
-                }
+                BH.Engine.Base.Compute.RecordError("File settings or template stream have not been provided.");
+                return new List<object>();
             }
 
             // Split the tables into collections to delete, create and update.
@@ -148,7 +142,20 @@ namespace BH.Adapter.Excel
             try
             {
                 Update(workbook, config.WorkbookProperties);
-                workbook.SaveAs(fileName);
+
+                if (m_FileSettings != null)
+                    workbook.SaveAs(m_FileSettings.GetFullFileName());
+                else if (m_OutputStream != null)
+                {
+                    workbook.SaveAs(m_OutputStream);
+                    m_OutputStream.Position = 0;
+                }  
+                else
+                {
+                    BH.Engine.Base.Compute.RecordError("Output stream has not been provided. The workbook cannot be saved.");
+                    return new List<object>();
+                }
+
                 return success ? objects.ToList() : new List<object>();
             }
             catch (Exception e)
@@ -160,6 +167,53 @@ namespace BH.Adapter.Excel
 
         /***************************************************/
         /**** Private Methods                           ****/
+        /***************************************************/
+
+        private XLWorkbook CreateWorkbookFromFile(string fileName, PushType pushType)
+        {
+            XLWorkbook workbook = null;
+            if (!File.Exists(fileName))
+            {
+                if (pushType == PushType.UpdateOnly)
+                {
+                    BH.Engine.Base.Compute.RecordError($"There is no workbook to update under {fileName}");
+                    return null;
+                }
+
+                workbook = new XLWorkbook();
+            }
+            else
+            {
+                try
+                {
+                    workbook = new XLWorkbook(fileName);
+                }
+                catch (Exception e)
+                {
+                    BH.Engine.Base.Compute.RecordError($"The existing workbook could not be accessed due to the following error: {e.Message}");
+                    return null;
+                }
+            }
+
+            return workbook;
+        }
+
+        /***************************************************/
+
+        private XLWorkbook CreateWorkbookFromStream(Stream inputStream)
+        {
+            try
+            {
+                return new XLWorkbook(inputStream);
+            }
+            catch (Exception e)
+            {
+                BH.Engine.Base.Compute.RecordError($"The existing workbook could not be accessed due to the following error: {e.Message}");
+                return null;
+            }
+        }
+
+
         /***************************************************/
 
         private List<TableRow> ToTableRows(List<object> objects, List<string> properties, List<string> propertiesToIgnore, bool goDeep = false, bool transposeTable = false, bool showPropertyNames = true)
