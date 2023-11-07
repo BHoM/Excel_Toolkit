@@ -42,7 +42,7 @@ namespace BH.Adapter.Excel
             if (request == null)
                 request = new CellValuesRequest();
 
-            if (!File.Exists(m_FileSettings.GetFullFileName()))
+            if (m_FileSettings != null && !File.Exists(m_FileSettings.GetFullFileName()))
             {
                 BH.Engine.Base.Compute.RecordError("No file exists under the location specified in the settings.");
                 return new List<IBHoMObject>();
