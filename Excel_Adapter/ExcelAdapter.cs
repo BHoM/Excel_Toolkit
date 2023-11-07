@@ -66,7 +66,7 @@ namespace BH.Adapter.Excel
         /***************************************************/
 
         [Description("Adapter to create a new Excel file based on an existing template.")]
-        [Input("templateStream", "Defines the content of the iput Excel file. This content will not be modifed")]
+        [Input("inputStream", "Defines the content of the input Excel file. This content will not be modified.")]
         [Output("outputStream", "Defines the content of the new Excel file. This will be generated on a push and is not required for a pull.")]
         public ExcelAdapter(Stream inputStream, Stream outputStream = null)
         {
