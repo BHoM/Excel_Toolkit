@@ -48,9 +48,14 @@ namespace BH.Adapter.Excel
             XLWorkbook workbook = null;
             try
             {
-                FileStream fileStream = new FileStream(m_FileSettings.GetFullFileName(), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                workbook = new XLWorkbook(fileStream);
-                fileStream.Close();
+                if (m_FileSettings != null)
+                {
+                    FileStream fileStream = new FileStream(m_FileSettings.GetFullFileName(), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                    workbook = new XLWorkbook(fileStream);
+                    fileStream.Close();
+                }
+                else
+                    workbook = new XLWorkbook(m_InputStream);
             }
             catch
             {
