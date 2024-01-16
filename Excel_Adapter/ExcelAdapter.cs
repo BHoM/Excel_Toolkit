@@ -57,6 +57,7 @@ namespace BH.Adapter.Excel
             }
 
             m_FileSettings = fileSettings;
+            fileSettings = null;
 
             // This is needed because of save action of large files being made with an isolated storage 
             // Fox taken from http://rekiwi.blogspot.com/2008/12/unable-to-determine-identity-of-domain.html
