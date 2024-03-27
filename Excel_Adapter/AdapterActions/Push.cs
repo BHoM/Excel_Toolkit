@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -64,7 +64,7 @@ namespace BH.Adapter.Excel
 
             // Cast action config to ExcelPushConfig, create new if null.
             ExcelPushConfig config = actionConfig as ExcelPushConfig;
-            if (config == null)
+            if (config == null && !(objects.FirstOrDefault() is PushItem))
             {
                 BH.Engine.Base.Compute.RecordNote($"{nameof(ExcelPushConfig)} has not been provided, default config is used.");
                 config = new ExcelPushConfig();
@@ -91,6 +91,74 @@ namespace BH.Adapter.Excel
             {
                 BH.Engine.Base.Compute.RecordError("File settings or template stream have not been provided.");
                 return new List<object>();
+            }
+
+            // Push the objects
+            List<object> pushedObjects = new List<object>();
+            if (objects.FirstOrDefault() is PushItem)
+            {
+                foreach (PushItem item in objects.OfType<PushItem>())
+                {
+                    if (PushObjects(workbook, item.Objects, item.Config, pushType))
+                        pushedObjects.AddRange(item.Objects);
+                } 
+            }
+            else
+            {
+                if (PushObjects(workbook, objects.ToList(), config, pushType))
+                    pushedObjects = objects.ToList();
+            }
+                
+            // Try to update the workbook properties and then save it.
+            try
+            {
+                if (config != null)
+                    Update(workbook, config.WorkbookProperties);
+
+                if (m_FileSettings != null)
+                    workbook.SaveAs(m_FileSettings.GetFullFileName());
+                else if (m_OutputStream != null)
+                {
+                    workbook.SaveAs(m_OutputStream);
+                    m_OutputStream.Position = 0;
+                }  
+                else
+                {
+                    BH.Engine.Base.Compute.RecordError("Output stream has not been provided. The workbook cannot be saved.");
+                    return new List<object>();
+                }
+
+                return pushedObjects;
+            }
+            catch (Exception e)
+            {
+                BH.Engine.Base.Compute.RecordError($"Finalisation and saving of the workbook failed with the following error: {e.Message}");
+                return new List<object>();
+            }
+        }
+
+        /***************************************************/
+        /**** Private Methods                           ****/
+        /***************************************************/
+
+        private bool PushObjects(XLWorkbook workbook, List<object> objects, ExcelPushConfig config, PushType pushType = PushType.AdapterDefault)
+        {
+            // Makwe sure the config is defined
+            if (config == null)
+            {
+                BH.Engine.Base.Compute.RecordNote($"{nameof(ExcelPushConfig)} has not been provided, default config is used.");
+                config = new ExcelPushConfig();
+            }
+
+            // Make sure that a single type of objects are pushed
+            List<Type> objectTypes = objects.Select(x => x.GetType()).Distinct().ToList();
+            if (objectTypes.Count != 1)
+            {
+                string message = "The Excel adapter only allows to push objects of a single type per table."
+                    + "\nRight now you are providing objects of the following types: "
+                    + objectTypes.Select(x => x.ToString()).Aggregate((a, b) => a + ", " + b);
+                Engine.Base.Compute.RecordError(message);
+                return false;
             }
 
             // Split the tables into collections to delete, create and update.
@@ -134,39 +202,14 @@ namespace BH.Adapter.Excel
                 default:
                     {
                         BH.Engine.Base.Compute.RecordError($"Currently Excel adapter does not supports {nameof(PushType)} equal to {pushType}");
-                        return new List<object>();
+                        return false;
                     }
             }
 
-            // Try to update the workbook properties and then save it.
-            try
-            {
-                Update(workbook, config.WorkbookProperties);
-
-                if (m_FileSettings != null)
-                    workbook.SaveAs(m_FileSettings.GetFullFileName());
-                else if (m_OutputStream != null)
-                {
-                    workbook.SaveAs(m_OutputStream);
-                    m_OutputStream.Position = 0;
-                }  
-                else
-                {
-                    BH.Engine.Base.Compute.RecordError("Output stream has not been provided. The workbook cannot be saved.");
-                    return new List<object>();
-                }
-
-                return success ? objects.ToList() : new List<object>();
-            }
-            catch (Exception e)
-            {
-                BH.Engine.Base.Compute.RecordError($"Finalisation and saving of the workbook failed with the following error: {e.Message}");
-                return new List<object>();
-            }
+            return success;
         }
 
-        /***************************************************/
-        /**** Private Methods                           ****/
+
         /***************************************************/
 
         private XLWorkbook CreateWorkbookFromFile(string fileName, PushType pushType)
@@ -309,6 +352,7 @@ namespace BH.Adapter.Excel
         /*******************************************/
     }
 }
+
 
 
 

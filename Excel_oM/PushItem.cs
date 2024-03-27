@@ -26,9 +26,11 @@ using System.Collections.Generic;
 
 namespace BH.oM.Adapters.Excel
 {
-    public class Worksheet : BHoMObject
+    public class PushItem : BHoMObject
     {
-        //Only want a name which can come from BHoMObject
+        public virtual List<object> Objects { get; set; } = new List<object>();
+
+        public virtual ExcelPushConfig Config { get; set; } = new ExcelPushConfig();
     }
 }
 

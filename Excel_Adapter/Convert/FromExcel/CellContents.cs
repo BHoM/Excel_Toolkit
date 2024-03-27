@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -44,14 +44,14 @@ namespace BH.Adapter.Excel
 
             return new CellContents()
             {
-                Comment = xLCell.HasComment ? xLCell.Comment.Text : "",
+                Comment = xLCell.HasComment ? xLCell.GetComment().Text : "",
                 Value = xLCell.CellValueOrCachedValue(),
                 Address = BH.Engine.Excel.Create.CellAddress(xLCell.Address.ToString()),
                 DataType = xLCell.DataType.SystemType(),
                 FormulaA1 = xLCell.FormulaA1,
                 FormulaR1C1 = xLCell.FormulaR1C1,
-                HyperLink = xLCell.HasHyperlink ? xLCell.Hyperlink.ExternalAddress.ToString() : "",
-                RichText = xLCell.HasRichText ? xLCell.RichText.Text : ""
+                HyperLink = xLCell.HasHyperlink ? xLCell.GetHyperlink().ExternalAddress.ToString() : "",
+                RichText = xLCell.HasRichText ? xLCell.GetRichText().Text : ""
             };
 
 
@@ -62,10 +62,10 @@ namespace BH.Adapter.Excel
         [Description("Gets the value of the cell, or cached value if the TryGetValue method fails. Raises a warning if the cached value is used, and ClosedXML beleives the cell needs to be recalculated.")]
         [Input("xLCell", "IXLCell to get the (cached) value from.")]
         [Input("value", "Value or cached value of the cell.")]
-        public static object CellValueOrCachedValue(this IXLCell xLCell) 
+        public static object CellValueOrCachedValue(this IXLCell xLCell)
         {
             object value;
-            if (!xLCell.TryGetValue(out value)) 
+            if (!xLCell.TryGetValue(out value))
             {
                 //If not able to just get the value, then get the cached value
                 //If cell is flagged as needing recalculation, raise warning.
@@ -103,5 +103,6 @@ namespace BH.Adapter.Excel
         /*******************************************/
     }
 }
+
 
 
