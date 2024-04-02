@@ -34,7 +34,9 @@ namespace BH.Engine.Excel
         /*******************************************/
 
         [Description("Creates an ExcelPushConfig based on starting cell address in an Excel-readable string format and workbook properties.")]
+        [Input("sheetName", "The name of the sheet in the excel file to push to.")]
         [Input("startingCell", "Starting cell address in an Excel-readable string format.")]
+        [Input("objectProperties", "Object properties to apply to the pushed objects.")]
         [InputFromProperty("workbookProperties")]
         [Output("config", "ExcelPushConfig created based on the inputs.")]
         public static ExcelPushConfig ExcelPushConfig(string sheetName = "", string startingCell = "", List<string> objectProperties = null, WorkbookProperties workbookProperties = null)
