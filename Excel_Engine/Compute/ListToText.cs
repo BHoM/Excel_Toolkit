@@ -38,6 +38,10 @@ namespace BH.Engine.Excel
         /**** Public Methods                    ****/
         /*******************************************/
 
+        [Description("Converts a list of objects into a single string using the delimiter provided to separate items.")]
+        [Input("objects", "The list of objects to be converted to a string.")]
+        [Input("delimiter", "The delimiter to be used that separates the items of the list.")]
+        [Output("text", "The output text.")]
         public static string ListToText(List<object> objects, string delimiter=",")
         {
             if (objects.Count == 0)
