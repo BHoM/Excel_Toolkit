@@ -42,7 +42,7 @@ namespace BH.Engine.Excel
         [Input("objects", "The list of objects to be converted to a string.")]
         [Input("delimiter", "The delimiter to be used that separates the items of the list.")]
         [Output("text", "The output text.")]
-        public static string ListToText(List<object> objects, string delimiter=",")
+        public static string ListToText(List<object> objects, string delimiter = ",")
         {
             if (objects.Count == 0)
                 return "";
