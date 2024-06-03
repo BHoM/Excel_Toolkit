@@ -64,7 +64,7 @@ namespace BH.Adapter.Excel
         [Input("value", "Value or cached value of the cell.")]
         public static object CellValueOrCachedValue(this IXLCell xLCell)
         {
-            object value;
+            XLCellValue value;
             if (!xLCell.TryGetValue(out value))
             {
                 //If not able to just get the value, then get the cached value
@@ -74,7 +74,7 @@ namespace BH.Adapter.Excel
 
                 value = xLCell.CachedValue;
             }
-            return value;
+            return ExtractValue(value);
         }
 
         /*******************************************/
@@ -95,6 +95,29 @@ namespace BH.Adapter.Excel
                     return typeof(string);
                 case XLDataType.TimeSpan:
                     return typeof(TimeSpan);
+                default:
+                    return null;
+            }
+        }
+
+        /*******************************************/
+
+        private static object ExtractValue(XLCellValue xCellValue)
+        {
+            switch (xCellValue.Type)
+            {
+                case XLDataType.Boolean:
+                    return xCellValue.GetBoolean();
+                case XLDataType.DateTime:
+                    return xCellValue.GetDateTime();
+                case XLDataType.Number:
+                    return xCellValue.GetNumber();
+                case XLDataType.Text:
+                    return xCellValue.GetText();
+                case XLDataType.TimeSpan:
+                    return xCellValue.GetTimeSpan();
+                case XLDataType.Error:
+                    return null;
                 default:
                     return null;
             }
