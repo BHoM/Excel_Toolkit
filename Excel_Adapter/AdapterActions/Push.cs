@@ -332,6 +332,9 @@ namespace BH.Adapter.Excel
             }
             else if (obj.GetType().IsPrimitive || obj is string || obj is Guid || obj is Enum)
             {
+                if (obj is Guid)
+                    obj = obj.ToString(); // TODO: Temporary fix to cover for a bug in IToText() from the base engine when used on Guids. Remove when fix in the base engine.
+
                 string key = parentType.Length > 0 ? parentType : "Value";
                 dict[key] = obj;
                 return;
