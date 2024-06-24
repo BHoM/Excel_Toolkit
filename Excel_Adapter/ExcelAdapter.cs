@@ -27,8 +27,6 @@ using BH.oM.Data.Requests;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using System.Security;
-using System.Security.Policy;
 using System.Threading;
 
 namespace BH.Adapter.Excel
@@ -57,10 +55,6 @@ namespace BH.Adapter.Excel
             }
 
             m_FileSettings = fileSettings;
-
-            // This is needed because of save action of large files being made with an isolated storage 
-            // Fox taken from http://rekiwi.blogspot.com/2008/12/unable-to-determine-identity-of-domain.html
-            VerifySecurityEvidenceForIsolatedStorage(this.GetType().Assembly);
         }
 
         /***************************************************/
@@ -93,45 +87,6 @@ namespace BH.Adapter.Excel
             }
             else
                 return base.SetupPullRequest(request, out actualRequest);
-        }
-
-
-        /***************************************************/
-        /**** Private Methods                           ****/
-        /***************************************************/
-
-        private void VerifySecurityEvidenceForIsolatedStorage(Assembly assembly)
-        {
-            var isEvidenceFound = true;
-#if ZCTDEPLOY
-            var initialAppDomainEvidence = new Evidence();
-#else
-            var initialAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence;
-#endif
-
-            try
-            {
-                // this will fail when the current AppDomain Evidence is instantiated via COM or in PowerShell
-                using (var usfdAttempt1 = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForDomain())
-                {
-                }
-            }
-            catch (System.IO.IsolatedStorage.IsolatedStorageException e)
-            {
-                isEvidenceFound = false;
-            }
-
-            if (!isEvidenceFound)
-            {
-                initialAppDomainEvidence.AddHostEvidence(new Url(assembly.Location));
-                initialAppDomainEvidence.AddHostEvidence(new Zone(SecurityZone.MyComputer));
-
-                var currentAppDomain = Thread.GetDomain();
-                var securityIdentityField = currentAppDomain.GetType().GetField("_SecurityIdentity", BindingFlags.Instance | BindingFlags.NonPublic);
-                securityIdentityField.SetValue(currentAppDomain, initialAppDomainEvidence);
-
-                //var latestAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence; // setting a breakpoint here will let you inspect the current app domain evidence
-            }
         }
 
 
