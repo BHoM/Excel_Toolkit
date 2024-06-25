@@ -62,25 +62,15 @@
       <HintPath>$(ProgramData)\BHoM\Assemblies\Reflection_Engine.dll</HintPath>
     </Reference>
   </ItemGroup>
-  
-  <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
 
   <ItemGroup>
+	<Reference Include="Microsoft.CSharp" />
     <PackageReference Include="ClosedXML" Version="0.102.2" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.16.0" />
     <PackageReference Include="ExcelNumberFormat" Version="1.1.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="SixLabors.Fonts" Version="1.0.0" />
     <PackageReference Include="System.IO.Packaging" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
-    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)'=='ZeroCodeTool'">
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
   </ItemGroup>
 
