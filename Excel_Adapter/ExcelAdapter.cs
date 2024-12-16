@@ -24,11 +24,10 @@ using BH.Adapter;
 using BH.oM.Adapters.Excel;
 using BH.oM.Base.Attributes;
 using BH.oM.Data.Requests;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using System.Security;
-using System.Security.Policy;
 using System.Threading;
 
 namespace BH.Adapter.Excel
@@ -44,6 +43,8 @@ namespace BH.Adapter.Excel
         [Output("adapter", "Adapter to Excel.")]
         public ExcelAdapter(BH.oM.Adapter.FileSettings fileSettings = null)
         {
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(PackagingAssemblyResolve);
+
             if (fileSettings == null)
             {
                 BH.Engine.Base.Compute.RecordError("Please set the File Settings to enable the Excel Adapter to work correctly.");
@@ -57,10 +58,6 @@ namespace BH.Adapter.Excel
             }
 
             m_FileSettings = fileSettings;
-
-            // This is needed because of save action of large files being made with an isolated storage 
-            // Fox taken from http://rekiwi.blogspot.com/2008/12/unable-to-determine-identity-of-domain.html
-            VerifySecurityEvidenceForIsolatedStorage(this.GetType().Assembly);
         }
 
         /***************************************************/
@@ -70,6 +67,8 @@ namespace BH.Adapter.Excel
         [Output("outputStream", "Defines the content of the new Excel file. This will be generated on a push and is not required for a pull.")]
         public ExcelAdapter(Stream inputStream, Stream outputStream = null)
         {
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(PackagingAssemblyResolve);
+
             if (inputStream == null)
             {
                 BH.Engine.Base.Compute.RecordError("Please set the Stream for the template to enable the Excel Adapter to work correctly.");
@@ -79,6 +78,23 @@ namespace BH.Adapter.Excel
             m_InputStream = inputStream;
             m_OutputStream = outputStream;
         }
+
+
+        /***************************************************/
+        /**** Private Methods                           ****/
+        /***************************************************/
+
+        private Assembly PackagingAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.StartsWith("System.IO.Packaging,"))
+            {
+                string assemblyPath = Path.Combine(BH.Engine.Base.Query.BHoMFolder(), "System.IO.Packaging.dll");
+                return Assembly.LoadFrom(assemblyPath);
+            }
+
+            return null;
+        }
+
 
         /***************************************************/
         /**** Override Methods                          ****/
@@ -93,45 +109,6 @@ namespace BH.Adapter.Excel
             }
             else
                 return base.SetupPullRequest(request, out actualRequest);
-        }
-
-
-        /***************************************************/
-        /**** Private Methods                           ****/
-        /***************************************************/
-
-        private void VerifySecurityEvidenceForIsolatedStorage(Assembly assembly)
-        {
-            var isEvidenceFound = true;
-#if ZCTDEPLOY
-            var initialAppDomainEvidence = new Evidence();
-#else
-            var initialAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence;
-#endif
-
-            try
-            {
-                // this will fail when the current AppDomain Evidence is instantiated via COM or in PowerShell
-                using (var usfdAttempt1 = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForDomain())
-                {
-                }
-            }
-            catch (System.IO.IsolatedStorage.IsolatedStorageException e)
-            {
-                isEvidenceFound = false;
-            }
-
-            if (!isEvidenceFound)
-            {
-                initialAppDomainEvidence.AddHostEvidence(new Url(assembly.Location));
-                initialAppDomainEvidence.AddHostEvidence(new Zone(SecurityZone.MyComputer));
-
-                var currentAppDomain = Thread.GetDomain();
-                var securityIdentityField = currentAppDomain.GetType().GetField("_SecurityIdentity", BindingFlags.Instance | BindingFlags.NonPublic);
-                securityIdentityField.SetValue(currentAppDomain, initialAppDomainEvidence);
-
-                //var latestAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence; // setting a breakpoint here will let you inspect the current app domain evidence
-            }
         }
 
 
