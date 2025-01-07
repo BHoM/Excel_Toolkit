@@ -86,10 +86,12 @@ namespace BH.Adapter.Excel
 
         private Assembly PackagingAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            if (args.Name.StartsWith("System.IO.Packaging,"))
+            string[] split = args.Name.Split(',');
+            if (split.Length > 1)
             {
-                string assemblyPath = Path.Combine(BH.Engine.Base.Query.BHoMFolder(), "System.IO.Packaging.dll");
-                return Assembly.LoadFrom(assemblyPath);
+                string assemblyPath = Path.Combine(BH.Engine.Base.Query.BHoMFolder(), $"{split[0]}.dll");
+                if (File.Exists(assemblyPath))
+                    return Assembly.LoadFrom(assemblyPath);
             }
 
             return null;
