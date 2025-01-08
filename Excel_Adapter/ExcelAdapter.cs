@@ -27,6 +27,7 @@ using BH.oM.Data.Requests;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -43,8 +44,6 @@ namespace BH.Adapter.Excel
         [Output("adapter", "Adapter to Excel.")]
         public ExcelAdapter(BH.oM.Adapter.FileSettings fileSettings = null)
         {
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(PackagingAssemblyResolve);
-
             if (fileSettings == null)
             {
                 BH.Engine.Base.Compute.RecordError("Please set the File Settings to enable the Excel Adapter to work correctly.");
@@ -67,8 +66,6 @@ namespace BH.Adapter.Excel
         [Output("outputStream", "Defines the content of the new Excel file. This will be generated on a push and is not required for a pull.")]
         public ExcelAdapter(Stream inputStream, Stream outputStream = null)
         {
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(PackagingAssemblyResolve);
-
             if (inputStream == null)
             {
                 BH.Engine.Base.Compute.RecordError("Please set the Stream for the template to enable the Excel Adapter to work correctly.");
@@ -77,24 +74,6 @@ namespace BH.Adapter.Excel
 
             m_InputStream = inputStream;
             m_OutputStream = outputStream;
-        }
-
-
-        /***************************************************/
-        /**** Private Methods                           ****/
-        /***************************************************/
-
-        private Assembly PackagingAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            string[] split = args.Name.Split(',');
-            if (split.Length > 1)
-            {
-                string assemblyPath = Path.Combine(BH.Engine.Base.Query.BHoMFolder(), $"{split[0]}.dll");
-                if (File.Exists(assemblyPath))
-                    return Assembly.LoadFrom(assemblyPath);
-            }
-
-            return null;
         }
 
 
