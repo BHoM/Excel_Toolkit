@@ -90,7 +90,7 @@ namespace BH.Adapter.Excel
             else if (request is WorksheetsRequest)
                 return ReadExcel(workbook, ((WorksheetsRequest)request));
             else if (request is BatchRequest batchRequest)
-                return batchRequest.Requests.SelectMany(x => ReadExcel(workbook, x, actionConfig)).ToList();
+                return batchRequest.Requests.Select(x => new ResultItem { Objects = ReadExcel(workbook, x, actionConfig), OriginalRequest = x }).ToList<IBHoMObject>();
             else
             {
                 BH.Engine.Base.Compute.RecordError($"Requests of type {request?.GetType()} are not supported by the Excel adapter.");
