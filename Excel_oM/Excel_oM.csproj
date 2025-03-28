@@ -1,25 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+	<TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyVersion>8.0.0.0</AssemblyVersion>
     <Description>https://github.com/BHoM/Excel_Toolkit</Description>
     <Version>5.0.0</Version>
     <Authors>BHoM</Authors>
     <Copyright>Copyright © https://github.com/BHoM</Copyright>
     <RootNamespace>BH.oM.Excel</RootNamespace>
-    <FileVersion>8.0.0.0</FileVersion>
+    <FileVersion>8.1.0.0</FileVersion>
     <Configurations>Debug;Release;ZeroCodeTool</Configurations>
     <OutputPath>..\Build\</OutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
-    <TargetFramework>net472</TargetFramework>
-    <DefineConstants>INSTALLERDEPLOY</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='ZeroCodeTool'">
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <DefineConstants>ZCTDEPLOY</DefineConstants>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
@@ -42,17 +34,6 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
 
 </Project>

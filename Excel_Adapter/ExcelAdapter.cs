@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2025, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -24,11 +24,11 @@ using BH.Adapter;
 using BH.oM.Adapters.Excel;
 using BH.oM.Base.Attributes;
 using BH.oM.Data.Requests;
+using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Security;
-using System.Security.Policy;
 using System.Threading;
 
 namespace BH.Adapter.Excel
@@ -57,10 +57,6 @@ namespace BH.Adapter.Excel
             }
 
             m_FileSettings = fileSettings;
-
-            // This is needed because of save action of large files being made with an isolated storage 
-            // Fox taken from http://rekiwi.blogspot.com/2008/12/unable-to-determine-identity-of-domain.html
-            VerifySecurityEvidenceForIsolatedStorage(this.GetType().Assembly);
         }
 
         /***************************************************/
@@ -80,6 +76,7 @@ namespace BH.Adapter.Excel
             m_OutputStream = outputStream;
         }
 
+
         /***************************************************/
         /**** Override Methods                          ****/
         /***************************************************/
@@ -97,45 +94,6 @@ namespace BH.Adapter.Excel
 
 
         /***************************************************/
-        /**** Private Methods                           ****/
-        /***************************************************/
-
-        private void VerifySecurityEvidenceForIsolatedStorage(Assembly assembly)
-        {
-            var isEvidenceFound = true;
-#if ZCTDEPLOY
-            var initialAppDomainEvidence = new Evidence();
-#else
-            var initialAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence;
-#endif
-
-            try
-            {
-                // this will fail when the current AppDomain Evidence is instantiated via COM or in PowerShell
-                using (var usfdAttempt1 = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForDomain())
-                {
-                }
-            }
-            catch (System.IO.IsolatedStorage.IsolatedStorageException e)
-            {
-                isEvidenceFound = false;
-            }
-
-            if (!isEvidenceFound)
-            {
-                initialAppDomainEvidence.AddHostEvidence(new Url(assembly.Location));
-                initialAppDomainEvidence.AddHostEvidence(new Zone(SecurityZone.MyComputer));
-
-                var currentAppDomain = Thread.GetDomain();
-                var securityIdentityField = currentAppDomain.GetType().GetField("_SecurityIdentity", BindingFlags.Instance | BindingFlags.NonPublic);
-                securityIdentityField.SetValue(currentAppDomain, initialAppDomainEvidence);
-
-                //var latestAppDomainEvidence = System.Threading.Thread.GetDomain().Evidence; // setting a breakpoint here will let you inspect the current app domain evidence
-            }
-        }
-
-
-        /***************************************************/
         /**** Private Fields                            ****/
         /***************************************************/
 
@@ -148,5 +106,6 @@ namespace BH.Adapter.Excel
         /***************************************************/
     }
 }
+
 
 

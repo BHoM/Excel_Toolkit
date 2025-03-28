@@ -20,45 +20,20 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
+using BH.oM.Base;
 using BH.oM.Base.Attributes;
-using System.ComponentModel;
+using BH.oM.Data.Requests;
+using System.Collections.Generic;
 
-namespace BH.Engine.Excel
+namespace BH.oM.Adapters.Excel
 {
-    public static partial class Query
+    public class ResultItem : BHoMObject
     {
-        /*******************************************/
-        /**** Public Methods                    ****/
-        /*******************************************/
+        public virtual List<IBHoMObject> Objects { get; set; } = new List<IBHoMObject>();
 
-        [Description("Returns the letter representing the column under given index, starting from 0 equal to A in Excel.")]
-        [Input("columnIndex", "Index of the column to be returned, starting from 0 equal to A in Excel.")]
-        [Output("column", "Letter representing the column under given index.")]
-        public static string ColumnName(this int columnIndex)
-        {
-            if (columnIndex < 0)
-            {
-                BH.Engine.Base.Compute.RecordError("Negative column index is not allowed.");
-                return null;
-            }
-
-            string columnName = "";
-
-            columnIndex++;
-            while (columnIndex > 0)
-            {
-                int modulo = (columnIndex - 1) % 26;
-                columnName = System.Convert.ToChar('A' + modulo) + columnName;
-                columnIndex = (columnIndex - modulo) / 26;
-            }
-
-            return columnName;
-        }
-
-        /*******************************************/
+        public virtual IRequest OriginalRequest { get; set; } = null;
     }
 }
-
 
 
 

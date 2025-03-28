@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2025, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -26,12 +26,10 @@ using BH.Engine.Excel;
 using BH.oM.Adapter;
 using BH.oM.Adapters.Excel;
 using BH.oM.Base;
-using BH.oM.Data.Collections;
 using BH.oM.Data.Requests;
 using ClosedXML.Excel;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 
@@ -68,6 +66,16 @@ namespace BH.Adapter.Excel
                 return new List<IBHoMObject>();
             }
 
+            return ReadExcel(workbook, request, actionConfig);
+        }
+
+
+        /***************************************************/
+        /**** Private Methods                           ****/
+        /***************************************************/
+
+        private List<IBHoMObject> ReadExcel(XLWorkbook workbook, IRequest request, ActionConfig actionConfig)
+        {
             if (request is ObjectRequest)
             {
                 List<TableRow> result = ReadExcel(workbook, ((ObjectRequest)request).Worksheet, ((ObjectRequest)request).Range, true).OfType<TableRow>().ToList();
@@ -81,6 +89,8 @@ namespace BH.Adapter.Excel
                 return ReadExcel(workbook, ((CellContentsRequest)request).Worksheet, ((CellContentsRequest)request).Range, false);
             else if (request is WorksheetsRequest)
                 return ReadExcel(workbook, ((WorksheetsRequest)request));
+            else if (request is BatchRequest batchRequest)
+                return batchRequest.Requests.Select(x => new ResultItem { Objects = ReadExcel(workbook, x, actionConfig), OriginalRequest = x }).ToList<IBHoMObject>();
             else
             {
                 BH.Engine.Base.Compute.RecordError($"Requests of type {request?.GetType()} are not supported by the Excel adapter.");
@@ -88,18 +98,15 @@ namespace BH.Adapter.Excel
             }
         }
 
-
-        /***************************************************/
-        /**** Private Methods                           ****/
         /***************************************************/
 
         private List<IBHoMObject> ReadExcel(XLWorkbook workbook, WorksheetsRequest request)
         {
-            var worksheets = Worksheets(workbook, null);
+            IEnumerable<IXLWorksheet> worksheets = Worksheets(workbook, null);
 
             List<BH.oM.Adapters.Excel.Worksheet> sheets = worksheets.Select(x =>
                 {
-                    var sheet = new BH.oM.Adapters.Excel.Worksheet();
+                    Worksheet sheet = new BH.oM.Adapters.Excel.Worksheet();
                     sheet.Name = x.Name;
                     return sheet;
                 }).ToList();
@@ -120,13 +127,13 @@ namespace BH.Adapter.Excel
                 if (string.IsNullOrEmpty(range.From.Column))
                     range.From.Column = "A";
 
-                if(range.From.Row == -1)
+                if (range.From.Row == -1)
                     range.From.Row = 1;
 
                 if (string.IsNullOrEmpty(range.To.Column))
                     range.To.Column = MaximumColumnName(workbook, worksheet);
 
-                if(range.To.Row == -1)
+                if (range.To.Row == -1)
                     range.To.Row = MaximumRowNumber(workbook, worksheet);
 
                 rangeString = range.ToExcel();
@@ -255,7 +262,7 @@ namespace BH.Adapter.Excel
                 CustomObject result = new CustomObject();
 
                 Dictionary<string, object> item = new Dictionary<string, object>();
-                for (int i = 0; i < Math.Min((int)keys.Count(), (int)row.Content?.Count()); i ++)
+                for (int i = 0; i < Math.Min((int)keys.Count(), (int)row.Content?.Count()); i++)
                 {
                     if (customProperties.Contains(keys[i]))
                         result.SetPropertyValue(keys[i], row.Content[i]);
@@ -273,19 +280,19 @@ namespace BH.Adapter.Excel
 
         private string MaximumColumnName(IXLWorkbook workbook, string worksheet)
         {
-            var sheet = Worksheets(workbook, worksheet).FirstOrDefault();
+            IXLWorksheet sheet = Worksheets(workbook, worksheet).FirstOrDefault();
             if (sheet == null)
                 return "XFD"; //Maximum Excel Column name
 
-            var columnNumber = sheet.LastColumnUsed().ColumnNumber();
-            return ConvertToColumnName(columnNumber);     
+            int columnNumber = sheet.LastColumnUsed().ColumnNumber();
+            return ConvertToColumnName(columnNumber);
         }
 
         /***************************************************/
 
         private int MaximumRowNumber(IXLWorkbook workbook, string worksheet)
         {
-            var sheet = Worksheets(workbook, worksheet).FirstOrDefault();
+            IXLWorksheet sheet = Worksheets(workbook, worksheet).FirstOrDefault();
             if (sheet == null)
                 return 1048576; //Maximum Excel Row number
 
@@ -311,6 +318,7 @@ namespace BH.Adapter.Excel
         }
     }
 }
+
 
 
 
