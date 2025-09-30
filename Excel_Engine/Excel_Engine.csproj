@@ -2,13 +2,13 @@
 
   <PropertyGroup>
 	<TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>8.0.0.0</AssemblyVersion>
+    <AssemblyVersion>9.0.0.0</AssemblyVersion>
     <Description>https://github.com/BHoM/Excel_Toolkit</Description>
     <Version>5.0.0</Version>
     <Authors>BHoM</Authors>
     <Copyright>Copyright © https://github.com/BHoM</Copyright>
     <RootNamespace>BH.Engine.Excel</RootNamespace>
-    <FileVersion>8.3.0.0</FileVersion>
+    <FileVersion>9.0.0.0</FileVersion>
     <Configurations>Debug;Release;ZeroCodeTool</Configurations>
     <OutputPath>..\Build\</OutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
