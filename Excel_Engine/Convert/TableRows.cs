@@ -37,6 +37,10 @@ namespace BH.Engine.Excel
         /**** Public Methods                            ****/
         /***************************************************/
 
+        [Description("Converts a collection of objects to a list of table rows.")]
+        [Input("objects", "Collection of objects to convert.")]
+        [Input("config", "ExcelPushConfig containing conversion settings. If null, default push config will be used.")]
+        [Output("tableRows", "List of table rows created based on the input objects.")]
         public static List<TableRow> ToTableRows(this IEnumerable<object> objects, ExcelPushConfig config = null)
         {
             if (config == null)
